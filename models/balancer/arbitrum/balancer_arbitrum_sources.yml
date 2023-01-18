@@ -44,9 +44,15 @@ sources:
           - *evt_block_time
           - *evt_block_number
           - name: amountIn
-            description: ''
+            description: 'Raw amount of the token provided to the pool'
           - name: amountOut
             description: 'Raw amount of the token bought from the pool'
+          - name: poolId
+            description: 'Balancer pool contract address'
+          - name: tokenIn
+            description: 'Contract address of the token provided to the pool'
+          - name: tokenOut
+            description: 'Contract address of the token bought from the pool'
 
       - name: WeightedPoolFactory_call_create
         description: >
