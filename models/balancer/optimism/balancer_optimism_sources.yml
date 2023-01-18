@@ -32,7 +32,6 @@ sources:
           - name: specialization
             description: 'Pool specialization'
       
-      
       - name: Vault_evt_Swap
         description: >
           Decoded table of swaps on the Balancer Vault contract.
@@ -139,49 +138,6 @@ sources:
           - *swapFeePercentage
           - *symbol
           - *tokens
-
-      - name: WeightedPoolFactory_call_create
-        description: >
-          Decoded table of registered pools on the Balancer WeightedPoolFactory contract.
-        loaded_at_field: evt_block_time
-        columns:
-          - &call_block_number
-            name: call_block_number
-            description: ''
-          - &call_block_time
-            name: call_block_time
-            description: ''
-          - &call_success
-            name: call_success
-            description: ''
-          - &call_trace_address
-            name: call_trace_address
-            description: ''
-          - &call_tx_hash
-            name: call_tx_hash
-            description: ''
-          - name: contract_address
-            description: ''
-          - name: name
-            description: ''
-          - &output_0
-            name: output_0
-            description: ''
-          - &owner
-            name: owner
-            description: ''
-          - &swapFeePercentage
-            name: swapFeePercentage
-            description: ''
-          - &symbol
-            name: symbol
-            description: ''
-          - &tokens
-            name: tokens
-            description: ''
-          - &weights
-            name: weights
-            description: ''
 
       - name: WeightedPool2TokensFactory_call_create
         description: >
