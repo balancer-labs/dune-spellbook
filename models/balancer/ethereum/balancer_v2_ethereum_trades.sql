@@ -32,6 +32,7 @@ WITH swap_fees AS (
 ),
 dexs AS (
     SELECT
+        swap.evt_block_number,
         swap.evt_block_time AS block_time,
         '' AS taker,
         '' AS maker,
@@ -61,6 +62,36 @@ dexs AS (
         {% if is_incremental() %}
         AND swap.evt_block_time >= DATE_TRUNC("day", NOW() - interval '1 week')
         {% endif %}
+),
+bpa AS (
+    SELECT
+        dexs.evt_block_number,
+        dexs.tx_hash,
+        dexs.evt_index,
+        bpt_prices.contract_address,
+        dexs.block_time,
+        MAX(bpt_prices.hour) AS bpa_max_block_time
+    FROM
+        dexs
+        LEFT JOIN balancer_v2_ethereum.bpt_prices bpt_prices
+            ON bpt_prices.contract_address = dexs.token_bought_address
+            AND bpt_prices.hour <= dexs.block_time
+    GROUP BY 1, 2, 3, 4, 5
+),
+bpb AS (
+    SELECT
+        dexs.evt_block_number,
+        dexs.tx_hash,
+        dexs.evt_index,
+        bpt_prices.contract_address,
+        dexs.block_time,
+        MAX(bpt_prices.hour) AS bpb_max_block_time
+    FROM
+        dexs
+        LEFT JOIN balancer_v2_ethereum.bpt_prices bpt_prices
+            ON bpt_prices.contract_address = dexs.token_sold_address
+            AND bpt_prices.hour <= dexs.block_time
+    GROUP BY 1, 2, 3, 4, 5
 )
 SELECT
     'ethereum' AS blockchain,
@@ -135,4 +166,18 @@ FROM
         {% if is_incremental () %}
         AND p_sold.minute >= DATE_TRUNC("day", NOW() - interval '1 week')
         {% endif %}
+    INNER JOIN bpa
+        ON bpa.evt_block_number = dexs.evt_block_number
+        AND bpa.tx_hash = dexs.tx_hash
+        AND bpa.evt_index = dexs.evt_index
+    LEFT JOIN balancer_v2_ethereum.bpt_prices bpa_bpt_prices
+        ON bpa_bpt_prices.contract_address = bpa.contract_address
+        AND bpa_bpt_prices.hour = bpa.bpa_max_block_time
+    INNER JOIN bpb
+        ON bpb.evt_block_number = dexs.evt_block_number
+        AND bpb.tx_hash = dexs.tx_hash
+        AND bpb.evt_index = dexs.evt_index
+    LEFT JOIN balancer_v2_ethereum.bpt_prices bpb_bpt_prices
+        ON bpb_bpt_prices.contract_address = bpb.contract_address
+        AND bpb_bpt_prices.hour = bpb.bpb_max_block_time
 ;
