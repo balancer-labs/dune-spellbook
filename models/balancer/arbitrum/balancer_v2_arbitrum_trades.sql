@@ -76,6 +76,13 @@ bpa AS (
         LEFT JOIN {{ ref('balancer_v2_arbitrum_bpt_prices') }} bpt_prices
             ON bpt_prices.contract_address = dexs.token_bought_address
             AND bpt_prices.hour <= dexs.block_time
+            -- Incremental logic.
+            {% if not is_incremental () %}
+            AND bpt_prices.hour >= '{{ project_start_date }}'
+            {% endif %}
+            {% if is_incremental () %}
+            AND bpt_prices.hour >= DATE_TRUNC("day", NOW() - interval '1 week')
+            {% endif %}
     GROUP BY 1, 2, 3, 4, 5
 ),
 bpb AS (
